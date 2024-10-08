@@ -1,0 +1,41 @@
+@colors: #000000, #7f7f7f, #880016,#ee1b24, #ff7f26, #fef200, #24b14b, 
+#00a1e9, #3f48cb, #a24aa1, 
+ #ffffff, #c3c3c3, #b97a57,
+ #ffadc9,
+  #ffc90d,#eee4af,#b2e71d,#98d9eb,#7192bf,
+    #7093bd,
+    #c7bfe6,
+    #f5f6f8,
+    #f6f6f8,
+    #f7f6f8,
+    #f8f6f8,
+    #f9f6f8,
+    #f1f6f8,
+    #f2f6f8,
+    #f3f6f8,
+    #f4f7f8,
+    #f4f5f8,
+;
+
+.box .grid-container {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr); // Điều chỉnh số lượng cột
+    gap: 2px;
+}
+
+.box-color {
+    border: 1px solid #b1b1b1;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+}
+
+.loop-colors(@index) when (@index > 0) {
+    .grid-item:nth-child(@{index}) .box-color {
+        background-color: extract(@colors, @index);
+    }
+
+    .loop-colors(@index - 1);
+}
+
+.loop-colors(length(@colors)); // Gọi hàm đệ quy để áp dụng màu cho các phần tử

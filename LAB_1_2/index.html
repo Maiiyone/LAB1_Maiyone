@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paint Application</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+        integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="./custom.css">
+    <link rel="stylesheet/less" href="./style.less">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/less.js/4.1.1/less.min.js"></script>
+</head>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html,
+    body {
+        height: 100%;
+    }
+
+    .page-wrapper {
+        padding: 0 1rem;
+    }
+
+    .divider {
+        width: 100%;
+        height: 1px;
+        background-color: #dee2e6;
+        margin: 1.5rem 0;
+    }
+
+    .divider-vertical-inherit {
+        width: 1px;
+        background-color: #dee2e6;
+        height: inherit;
+
+    }
+
+    .divider-vertical {
+        width: 1px;
+        background-color: #dee2e6;
+        height: 1rem;
+    }
+
+    .action-bar {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+    }
+
+    .action-bar .action-bar-item {
+        margin-right: 10px;
+    }
+
+    .menu-bar {
+        display: flex;
+    }
+
+    .menu-tab {
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: background-color 0.2s, color 0.2s;
+        border: 1px solid transparent;
+        border-bottom: 1px solid #ececec;
+    }
+
+    .menu-tab:first-child {
+        border: none;
+        color: white;
+        background-color: #197acb;
+    }
+
+    .menu-tab.active-tab {
+        background-color: #f6f6f6;
+        color: #333;
+        border: 1px solid #ececec;
+        border-bottom: none;
+    }
+
+
+    .menu-tab+.menu-tab {
+        margin-left: -1px;
+    }
+
+    .menu-tab:last-child {
+        margin-right: 0;
+        width: 100%;
+    }
+
+    .toolbar {
+        display: flex;
+        flex-direction: row;
+        background-color: #f5f6f8;
+    }
+
+    .toolbar-section {
+
+        padding-top: .25rem !important;
+        display: flex;
+        flex-direction: column;
+        /* justify-content: center;*/
+    }
+
+    .tab-content {
+        background-color: #f5f6f8;
+        border: 1px solid #dee2e6;
+        border-top: none;
+        padding: 5px 10px;
+        overflow: auto;
+    }
+
+    .tab-panel {
+
+        display: none;
+    }
+
+    .tab-panel.active {
+
+        display: block;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border: 1px solid #dee2e6;
+        z-index: 1000;
+    }
+
+    .modal.active {
+        display: block;
+    }
+
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+    }
+
+    .modal-overlay.active {
+        display: block;
+    }
+
+    .tools-section .grid-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        margin-top: auto;
+    }
+
+    .tools-section .grid-item {
+        padding: 5px;
+    }
+
+    .shapes-section .grid-container {
+        padding: 2px;
+        background-color: white;
+        display: grid;
+        grid-template-columns: repeat(6, 2fr);
+        grid-template-rows: 3;
+        row-gap: .5rem;
+        column-gap: 1rem;
+    }
+
+    .grid-item button {
+        outline: none;
+        box-shadow: none;
+        cursor: pointer;
+        border: none;
+        background-color: white;
+    }
+</style>
+
+<body>
+
+    <div class="page-wrapper">
+        <div class="action-bar">
+            <div class="action-bar-item"> <img src="./icons/microsoft-paint.png" alt="" width="24" height="24"></div>
+
+            <div class="action-bar-item divider-vertical"></div>
+            <div class="action-bar-item">
+                <img src="./icons/save_32x32.png" alt="" width="24" height="24">
+            </div>
+            <div class="action-bar-item">
+                <img src="./icons/undo_32x32.png" alt="" width="24" height="24">
+            </div>
+            <div class="action-bar-item">
+                <img src="./icons/redo_32x32.png" alt="" width="24" height="24">
+            </div>
+            <div class="action-bar-item">
+                <img src="./icons/carret-down.png" alt="" width="20" height="20">
+            </div>
+
+            <div class="action-bar-item divider-vertical"></div>
+
+            <div class="action-bar-item">
+                Untitled - Paint
+            </div>
+        </div>
+
+        <div class="menu-bar tabs">
+            <div class="menu-tab" id="file-tab">File</div>
+            <div class="menu-tab active-tab" data-tab="home">Home</div>
+            <div class="menu-tab" data-tab="view">View</div>
+        </div>
+
+        <div class="tab-content">
+            <div id="home" class="tab-panel active">
+                <div class="toolbar">
+                    <div class="toolbar-section clipboard-section">
+                        <div class="row h-full">
+                            <div class="col-sm-6 d-flex">
+                                <div class="img-paste d-flex justify-center flex-column items-center">
+                                    <img src="./icons/paste_32x32.png" alt="">
+                                    <span class="mt-2" style="text-align: center;">Paste</span>
+                                    <i class="fa-solid fa-caret-down"></i>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 mx-2 d-flex flex-column justify-center">
+                                <div class="row">
+                                    <div class="d-flex items-center">
+                                        <img src="./icons/cut_32x32.png" alt="" width="24" height="24">
+                                        <span class="my-2 ml-2">Cut</span>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="d-flex justify-center flex-row items-center">
+                                        <img src="./icons/copy_32x32.png" alt="" width="24" height="24">
+                                        <span class="my-2 ml-2">Copy</span>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                        <div class="text-muted " style="text-align: center; margin-top: auto;">
+                            Clipboards
+                        </div>
+                    </div>
+                    <div class="divider-vertical-inherit mx-2 my-1"></div>
+                    <div class="toolbar-section image-section">
+                        <div class="row h-full">
+                            <div class="col-sm-6 d-flex">
+                                <div class="d-flex justify-center flex-column items-center">
+                                    <img src="./icons/select.png" alt="" width="40" height="40">
+                                    <span class="mt-2" style="text-align: center;">Select</span>
+                                    <i class="fa-solid fa-caret-down"></i>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 mx-4 d-flex justify-center flex-column">
+                                <div class="row">
+                                    <div class="d-flex  flex-row items-center">
+                                        <img src="./icons/crop.png" alt="" width="24" height="24">
+                                        <span class="my-2  ml-2">Crop</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="d-flex  flex-row items-center">
+                                        <img src="./icons/resize.png" alt="" width="24" height="24">
+                                        <span class="my-2 ml-2">Resize</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="d-flex  flex-row justify-between items-center">
+                                        <img src="./icons/ronate.png" alt="" width="24"
+                                            style="background-color: transparent;background: none;" height="24">
+                                        <span class="my-2 ml-2">Ronate</span>
+                                        <i class="fa-solid fa-caret-down ml-1" style="font-size: 10px;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-muted " style="text-align: center; margin-top: auto;">
+                            Image
+                        </div>
+                    </div>
+                    <div class="divider-vertical-inherit mx-2 my-1"></div>
+                    <div class="toolbar-section tools-section ">
+                        <div class="grid-container">
+                            <div class="grid-item">
+                                <img src="./icons/pencolor.png" alt="" width="24" height="24">
+                            </div>
+                            <div class="grid-item">
+                                <img src="./icons/fill.png" alt="" width="24" height="24">
+                            </div>
+                            <div class="grid-item">
+                                <img src="./icons/Aletter.png" alt="" width="24" height="24">
+                            </div>
+                            <div class="grid-item">
+                                <img src="./icons/eraser.png" alt="" width="24" height="24">
+                            </div>
+                            <div class="grid-item">
+                                <img src="./icons/color-picker.png" alt="" width="24" height="24">
+                            </div>
+                            <div class="grid-item">
+                                <img src="./icons/look.png" alt="" width="24" height="24">
+                            </div>
+                        </div>
+                        <div class="text-muted " style="text-align: center; margin-top: auto;">
+                            Tools
+                        </div>
+                    </div>
+                    <div class="divider-vertical-inherit mx-1 my-1"></div>
+                    <div class="toolbar-section none-section pt-1 ml-1">
+                        <div class="d-flex  flex-column items-center bg-active border border-active">
+                            <div class="mx-1">
+                                <img src="./icons/brush.png" alt="" width="50" height="40">
+                            </div>
+                            <span class="my-1">Brushes</span>
+                            <i class="fa-solid fa-caret-down"></i>
+                        </div>
+
+                    </div>
+                    <div class="divider-vertical-inherit mx-2 my-1"></div>
+
+                    <div class="toolbar-section shapes-section pt-1">
+                        <div class="d-flex">
+                            <div class="grid-container" style="border: 1px solid #ececec;">
+
+                                <div class="grid-item">
+                                    <button href="">
+                                        <img src="./icons/line_cheo.png" alt="" width="24" height="24"></button>
+                                </div>
+
+                                <div class="grid-item">
+                                    <button href="">
+                                        <img src="./icons/line2.png" alt="" width="24" height="24"></button>
+                                </div>
+
+                                <div class="grid-item">
+                                    <button href="">
+                                        <img src="./icons/shape3.png" alt="" width="24" height="24"></button>
+                                </div>
+
+                                <div class="grid-item">
+                                    <button href="">
+                                        <img src="./icons/shape4.png" alt="" width="24" height="24"></button>
+                                </div>
+
+                                <div class="grid-item">
+                                    <button href="">
+                                        <img src="./icons/shape5.png" alt="" width="24" height="24"></button>
+                                </div>
+
+                                <div class="grid-item">
+                                    <button href="">
+                                        <img src="./icons/shape6.png" alt="" width="24" height="24"></button>
+                                </div>
+
+                                <div class="grid-item">
+                                    <button href="">
+                                        <img src="./icons/shape7.png" alt="" width="24" height="24"></button>
+                                </div>
+
+                                <div class="grid-item">
+                                    <button href="">
+                                        <img src="./icons/shape8.png" alt="" width="24" height="24"></button>
+                                </div>
+
+                                <div class="grid-item">
+                                    <button href="">
+                                        <img src="./icons/shape9.png" alt="" width="24" height="24"></button>
+                                </div>
+
+                                <div class="grid-item">
+                                    <button href="">
+                                        <img src="./icons/shape10.png" alt="" width="24" height="24"></button>
+                                </div>
+
+                                <div class="grid-item">
+                                    <button href="">
+                                        <img src="./icons/shape11.png" alt="" width="24" height="24"></button>
+                                </div>
+
+                                <div class="grid-item">
+                                    <button href="">
+                                        <img src="./icons/shape12.png" alt="" width="24" height="24"></button>
+                                </div>
+
+                                <div class="grid-item">
+                                    <button href="">
+                                        <img src="./icons/shape13.png" alt="" width="24" height="24"></button>
+                                </div>
+
+                                <div class="grid-item">
+                                    <button href="">
+                                        <img src="./icons/shape14.png" alt="" width="24" height="24"></button>
+                                </div>
+
+                                <div class="grid-item">
+                                    <button href="">
+                                        <img src="./icons/shape15.png" alt="" width="24" height="24"></button>
+                                </div>
+
+                                <div class="grid-item">
+                                    <button href="">
+                                        <img src="./icons/shape16.png" alt="" width="24" height="24"></button>
+                                </div>
+                                <div class="grid-item">
+                                    <button href="">
+                                        <img src="./icons/shape17.png" alt="" width="24" height="24"></button>
+                                </div>
+                                <div class="grid-item">
+                                    <button href="">
+                                        <img src="./icons/shape18.png" alt="" width="24" height="24"></button>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-column justify-around p-2"
+                                style="border: 1px solid #ececec; border-left: none; ">
+                                <div><i class="fa-solid fa-caret-up"></i></div>
+                                <div><i class="fa-solid fa-caret-down" style="color: gray;"></i></div>
+                                <div><i class="fa-solid fa-angles-down" style="font-size: 12px;"></i></div>
+                            </div>
+                            <div class="d-flex flex-column mx-2 p-1">
+                                <div class="d-flex items-center mb-2">
+                                    <img src="./icons/outline.png" alt="" width="20" height="20">
+                                    <span class="mx-1">Outline</span>
+                                    <div><i class="fa-solid fa-caret-down"></i></div>
+                                </div>
+                                <div class="d-flex items-center mb-2">
+                                    <img src="./icons/fill2.png" alt="" width="20" height="20">
+                                    <span class="mx-1">Fill</span>
+                                    <div><i class="fa-solid fa-caret-down"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-muted " style="text-align: center; margin-top: auto;">
+                            Shapes
+                        </div>
+                    </div>
+                    <div class="divider-vertical-inherit mx-2 my-1"></div>
+                    <div class="toolbar-section none-section2  pt-1">
+                        <div class="box">
+                            <div class=" p-1">
+                                <img src="./icons/size.png" alt="" width="32" height="32">
+                            </div>
+                            <div class="text-center">Size</div>
+                            <div class="text-center"> <i class="fa-solid fa-caret-down "></i></div>
+                        </div>
+                    </div>
+                    <div class="divider-vertical-inherit mx-2 my-1"></div>
+                    <div class="toolbar-section colors-section  pt-1">
+                        <div class="d-flex flex-row">
+                            <div class="box mr-2" >
+                               <div style="background-color: #c9e0f7;border: 2px solid #95c1ed;">
+                                <div class="border border-secondary p-1">
+                                    <div style="background-color: black; width: 40px; height: 40px;"></div>
+                                </div>
+                                <div class="text-center">Color</div>
+                                <div class="text-center">1</div>
+                               </div>
+                            </div>
+                            <div class="box mr-2">
+                                <div class="p-1">
+                                    <div class="border border-secondary"
+                                        style="background-color: white; width: 40px; height: 40px;"></div>
+                                </div>
+                                <div class="text-center">Color</div>
+                                <div class="text-center">2</div>
+                            </div>
+                            <div class="box mr-2">
+                                <div class="grid-container">
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+                                    <div class="grid-item">
+                                        <div class="box-color"></div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="box-last mr-2">
+                                <div class="px-2">
+                                    <img class="border border-primary" src="./icons/colors.png" alt=""
+                                        style="width: 40px; height: 40px;">
+                                </div>
+                                <div class="text-center">Edit colors</div>
+                                <div class="text-center"><i class="fa-solid fa-caret-down"></i></div>
+                            </div>
+                            <div class="divider-vertical-inherit mx-2"></div>
+                            <div class="box-last mr-2">
+                                <div class="">
+                                    <img class="border border-primary" src="./icons/paint-3d.png" alt=""
+                                        style="width: 40px; height: 40px;">
+                                </div>
+                                <div class="text-center">Edit with Paint 3D</div>
+                                <div class="text-center"><i class="fa-solid fa-caret-down"></i></div>
+                            </div>
+                          
+                        </div>
+                        <div class="text-muted " style="text-align: center; margin-top: auto;">
+                            Colors
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="view" class="tab-panel">
+                <div class="toolbar">
+                    <div class="toolbar-section clipboard-section">6</div>
+                    <div class="toolbar-section image-section">7</div>
+                    <div class="toolbar-section tools-section">8</div>
+                    <div class="toolbar-section none-section">9</div>
+                    <div class="toolbar-section colors-section">10</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal-overlay" id="modal-overlay"></div>
+        <div class="modal" id="file-modal">
+            <h2>File Options</h2>
+            <p>Hi.</p>
+            <button id="close-modal">Close</button>
+        </div>
+
+        <main></main>
+    </div>
+
+    <script>
+        document.querySelectorAll('.menu-tab').forEach(tab => {
+            tab.addEventListener('click', function () {
+                const tabPaneId = this.getAttribute('data-tab');
+                if (tabPaneId) {
+
+                    document.querySelectorAll('.menu-tab').forEach(item => item.classList.remove('active-tab'));
+                    document.querySelectorAll('.tab-panel').forEach(pane => pane.classList.remove('active'));
+
+                    this.classList.add('active-tab');
+                    document.getElementById(tabPaneId).classList.add('active');
+                }
+            });
+        });
+
+        document.getElementById('file-tab').addEventListener('click', function () {
+            document.getElementById('file-modal').classList.add('active');
+            document.getElementById('modal-overlay').classList.add('active');
+        });
+
+        document.getElementById('close-modal').addEventListener('click', function () {
+            document.getElementById('file-modal').classList.remove('active');
+            document.getElementById('modal-overlay').classList.remove('active');
+        });
+
+        document.getElementById('modal-overlay').addEventListener('click', function () {
+            document.getElementById('file-modal').classList.remove('active');
+            document.getElementById('modal-overlay').classList.remove('active');
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <div class="page-wrapper">
+        <div class="container-wrapper">
+            <div class="box">
+                <div class="banner">
+                    <img class="img-banner"
+                        src="https://courses.uit.edu.vn/pluginfile.php/1/core_admin/logo/0x200/1723397100/logo-header.png"
+                        alt="">
+                </div>
+                <form>
+                    <div class="form-group">
+                        <label for=""></label>
+                        <input type="text" class="form-control form-control-md" placeholder="Tên tài khoản">
+                    </div>
+                    <div class="form-group">
+                        <label for=""></label>
+                        <input type="text" class="form-control form-control-md" placeholder="Mật khẩu">
+                    </div>
+
+                    <button type="button" class="btn-login">Đăng nhập</button>
+
+
+                </form>
+                <div class="form-link">
+                    <a href="#" class="a-link">Quên mật khẩu ?</a>
+                </div>
+                <div class="divider"></div>
+                <div class="footer-form">
+                    <div class="dropdown">
+                        <button class="dropdown-toggle" id="dropdownButton">
+                            Vietnamese (vi) <span class="caret">&#8744; </span>
+                        </button>
+                        <div class="dropdown-menu" id="dropdownMenu">
+                            <a href="#" data-lang="English (en)">English (en)</a>
+                            <a href="#" data-lang="Vietnamese (vi)">Vietnamese (vi)</a>
+                            <a href="#" data-lang="Japanese (ja)">Japanese (ja)</a>
+                        </div>
+                    </div>
+                    <div class="divider-vertical"></div>
+                    <div>
+                        <button type="button" class="btn btn-secondary">Thông báo từ các Cookies</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const dropdownButton = document.getElementById('dropdownButton');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+
+        dropdownButton.addEventListener('click', () => {
+            dropdownMenu.parentElement.classList.toggle('active');
+        });
+
+        dropdownMenu.querySelectorAll('a').forEach(item => {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+                const selectedLang = this.getAttribute('data-lang');
+                dropdownButton.innerHTML = selectedLang + '  <span class="caret">&#8744; </span>';
+                dropdownMenu.parentElement.classList.remove('active'); // Close dropdown after selection
+            });
+        });
+        window.addEventListener('click', function (e) {
+            if (!dropdownButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                dropdownMenu.parentElement.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+
+
+</html>
